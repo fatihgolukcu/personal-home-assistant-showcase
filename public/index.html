@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E1322">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Personal Home Assistant">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Personal Home Assistant</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div id="login" hidden>
+  <div class="logo"><i class="ic" data-ic="house" data-s="44"></i></div>
+  <h1>Personal Home Assistant</h1>
+  <p class="ink2">PIN kodunu girin</p>
+  <div class="pinbox">
+    <input id="pin" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="12" aria-label="PIN">
+  </div>
+  <button class="btn pri" id="loginBtn" style="width:100%;max-width:340px">Giriş</button>
+  <p class="hint ink2">Yalnızca ev ağında veya Tailscale üzerinden erişilir.</p>
+</div>
+
+<div id="app" hidden>
+<div id="netBanner" class="netbar" hidden><i class="ic" data-ic="wifi-off" data-s="20"></i><span>Bağlantı yeniden kuruluyor…</span></div>
+<main>
+
+  <!-- ===== EV ===== -->
+  <section id="t-home" class="on">
+    <div class="top">
+      <div><h1 id="hello">Personal Home Assistant</h1><p class="sub" id="dateLbl"></p></div>
+      <div class="tr"><div class="big num" id="clock"></div><span class="chip" id="linkChip" hidden></span></div>
+    </div>
+    <div class="cols">
+      <div class="col">
+        <div class="card raised" id="asstCard">
+          <div class="row" style="gap:14px">
+            <button class="mic" id="micBtn" aria-label="Konuş"><i class="ic" data-ic="mic" data-s="28"></i></button>
+            <div class="grow">
+              <div class="sec-t" style="margin:0 0 4px">Asistan</div>
+              <div id="asstOut" class="ink2">Mikrofona dokunup konuşun ya da yazın.</div>
+            </div>
+          </div>
+          <div id="asstConfirm" class="grid2" hidden><button class="btn pri" id="asstYes"><i class="ic" data-ic="check" data-s="20"></i>Evet, yap</button><button class="btn" id="asstNo">Hayır</button></div>
+          <div class="field pillf"><input id="asstText" placeholder="Yazın: TV’yi aç · sesi kıs · radyoyu başlat" autocomplete="off"><button class="ibtn flat gold" id="asstSend" aria-label="Gönder"><i class="ic" data-ic="send" data-s="20"></i></button></div>
+        </div>
+        <div>
+          <h2 class="sec-t">Sahneler</h2>
+          <div class="grid2">
+            <button class="tile pri" data-do="scene.morning"><span class="bub"><i class="ic" data-ic="sun" data-s="20"></i></span><span><b>Günaydın</b><small>TV açılır, radyo çalar</small></span></button>
+            <button class="tile" data-do="scene.quiet"><span class="bub"><i class="ic" data-ic="bell-off" data-s="20"></i></span><span><b>Sessiz</b><small>Tüm yayınları durdur</small></span></button>
+            <button class="tile" data-do="scene.night"><span class="bub"><i class="ic" data-ic="moon" data-s="20"></i></span><span><b>İyi geceler</b><small>Radyo durur, ekranlar kapanır</small></span></button>
+            <button class="tile" data-do="scene.away"><span class="bub"><i class="ic" data-ic="exit" data-s="20"></i></span><span><b>Evden çıkış</b><small>Radyo durur, TV uyur</small></span></button>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div>
+          <h2 class="sec-t">Cihazlar</h2>
+          <div class="card flush list" id="status">
+            <div class="li"><span class="sk" style="width:40px;height:40px;border-radius:50%"></span><div class="t"><div class="sk" style="width:120px;height:12px;margin-bottom:6px"></div><div class="sk" style="width:200px;height:10px"></div></div></div>
+            <div class="li"><span class="sk" style="width:40px;height:40px;border-radius:50%"></span><div class="t"><div class="sk" style="width:90px;height:12px;margin-bottom:6px"></div><div class="sk" style="width:170px;height:10px"></div></div></div>
+          </div>
+        </div>
+        <div>
+          <h2 class="sec-t">Hızlı erişim</h2>
+          <div class="grid2">
+            <button class="qt" data-do="tv.input" data-body='{"input":"ps"}'><span class="bub sm"><i class="ic" data-ic="gamepad" data-s="18"></i></span><span><b>PlayStation</b><small>TV kaynağı · HDMI 3</small></span></button>
+            <button class="qt" data-go="radio"><span class="bub sm"><i class="ic" data-ic="radio" data-s="18"></i></span><span><b>Radyo</b><small>Live stream</small></span></button>
+            <button class="qt" id="mirrorOpen"><span class="bub sm"><i class="ic" data-ic="share" data-s="18"></i></span><span><b>Yansıt / DeX</b><small>Telefon → TV</small></span></button>
+            <a class="qt" href="https://YOUR-HOST.your-tailnet.ts.net" target="_blank" rel="noopener"><span class="bub sm"><i class="ic" data-ic="code" data-s="18"></i></span><span><b>VS Code</b><small>Tailscale gerekli</small></span></a>
+            <a class="qt" href="https://claude.ai/code" target="_blank" rel="noopener"><span class="bub sm"><i class="ic" data-ic="terminal" data-s="18"></i></span><span><b>Claude Code</b><small>Sunucuyu geliştir</small></span></a>
+          </div>
+        </div>
+        <div style="text-align:center">
+          <a class="btn ghost" id="apkLink" href="/personal-home-assistant.apk" hidden>Android uygulamasını indir (APK)</a>
+          <p class="hint" style="margin-top:4px">TV bekleme modunda ağı kapatırsa kumanda ulaşamaz; TV’nin ağda uyanık kalması gerekir.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RADYO (alt sayfa) ===== -->
+  <section id="t-radio">
+    <div class="top back"><button class="ibtn" data-go="home" aria-label="Geri"><i class="ic" data-ic="back" data-s="22"></i></button><h1>Radio</h1><span class="chip info">Canlı yayın</span></div>
+    <div class="cols">
+      <div class="col">
+        <div class="card center" style="background:linear-gradient(180deg,#141A2B,#1D2033 70%,#2A2A3C);gap:16px;padding:20px">
+          <div class="mic" style="width:88px;height:88px;box-shadow:none"><i class="ic" data-ic="radio" data-s="40"></i></div>
+          <div><h3 style="font-size:20px;line-height:26px;font-weight:700">Radio</h3><p class="ink2">TV veya tablette çalın</p></div>
+          <div class="row" style="width:100%"><button class="ibtn" data-do="tv.volume" data-body='{"delta":-0.05}' aria-label="Sesi kıs"><i class="ic" data-ic="minus" data-s="22"></i></button><div class="grow center hint" style="text-align:center">TV sesi</div><button class="ibtn" data-do="tv.volume" data-body='{"delta":0.05}' aria-label="Sesi aç"><i class="ic" data-ic="plus" data-s="22"></i></button></div>
+          <p class="hint">Ses Chromecast üzerinden ayarlanır; radyo yayınlanırken çalışır.</p>
+        </div>
+      </div>
+      <div class="col">
+        <div>
+          <h2 class="sec-t">Nerede çalsın</h2>
+          <div class="card flush list">
+            <div class="li"><span class="bub"><i class="ic" data-ic="volume" data-s="20"></i></span><div class="t"><b>Bu cihazda çal</b><small>Uygulamanın içinde</small></div><button class="ibtn acc" id="radioHere" aria-label="Bu cihazda çal"><i class="ic" data-ic="play" data-s="20"></i></button></div>
+            <div class="li"><span class="bub"><i class="ic" data-ic="cast" data-s="20"></i></span><div class="t"><b>TV’de çal</b><small>Chromecast ile · en kolayı</small></div><button class="ibtn acc" data-do="radio.cast" aria-label="TV’de çal"><i class="ic" data-ic="play" data-s="20"></i></button></div>
+            <div class="li"><span class="bub"><i class="ic" data-ic="tv" data-s="20"></i></span><div class="t"><b>TV · doğrudan yayın</b><small>TV tarayıcısında</small></div><button class="ibtn" data-do="radio.direct" data-body='{"device":"tv"}' aria-label="Doğrudan yayın"><i class="ic" data-ic="play" data-s="20"></i></button></div>
+            <div class="li"><span class="bub"><i class="ic" data-ic="globe" data-s="20"></i></span><div class="t"><b>TV · radyo sayfası</b><small>TV tarayıcısında</small></div><button class="ibtn" data-do="radio.castpage" aria-label="Radyo sayfası"><i class="ic" data-ic="play" data-s="20"></i></button></div>
+            <div class="li"><span class="bub"><i class="ic" data-ic="tablet" data-s="20"></i></span><div class="t"><b>Tablette çal</b><small>Doğrudan yayın, tarayıcıda</small></div><button class="ibtn" data-do="radio.tablet" aria-label="Tablette çal"><i class="ic" data-ic="play" data-s="20"></i></button></div>
+          </div>
+        </div>
+        <div>
+          <h2 class="sec-t">Durdur</h2>
+          <div class="grid2"><button class="btn bad" data-do="radio.stop" data-body='{"device":"tv"}'><i class="ic" data-ic="stop" data-s="20"></i>TV’yi durdur</button><button class="btn bad" data-do="radio.stop" data-body='{"device":"tablet"}'><i class="ic" data-ic="stop" data-s="20"></i>Tableti durdur</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CİHAZLAR · TV ===== -->
+  <section id="t-tv">
+    <div class="top"><h1>Cihazlar</h1><span class="chip" id="tvChip" hidden></span></div>
+    <div class="seg dev" style="margin-bottom:20px;max-width:420px"><button class="on" data-go="tv">TV</button><button data-go="tab">Tablet</button></div>
+    <div class="cols rm">
+      <div class="card tvst">
+        <div class="row"><span class="bub"><i class="ic" data-ic="tv" data-s="20"></i></span><div class="grow"><b style="font-weight:500">TCL TV</b><div class="hint" id="tvSub">kumanda ve uygulamalar</div></div></div>
+        <div class="grid2"><button class="btn" data-do="tv.power_on"><i class="ic" data-ic="power" data-s="20"></i>TV’yi aç</button><button class="btn" data-key="sleep"><i class="ic" data-ic="moon" data-s="20"></i>TV’yi uyut</button></div>
+        <div class="row"><button class="ibtn" data-key="voldown" aria-label="Sesi kıs"><i class="ic" data-ic="minus" data-s="22"></i></button><div class="grow hint" style="text-align:center">Ses</div><button class="ibtn" data-key="volup" aria-label="Sesi aç"><i class="ic" data-ic="plus" data-s="22"></i></button></div>
+      </div>
+      <div class="card tvpad">
+        <div class="row sb"><h2 class="sec-t" style="margin:0">Fare pedi</h2><span class="hint">dokun = seç · sürükle = gezin · uzun bas = geri · iki parmak = ana ekran</span></div>
+        <div id="tvPad" class="pad" tabindex="0" aria-label="TV fare pedi"><span>Parmağınızı burada gezdirin</span></div>
+        <div class="grid3" style="grid-template-columns:repeat(4,1fr)">
+          <button class="keyt" data-key="back"><i class="ic" data-ic="back" data-s="22"></i>Geri</button>
+          <button class="keyt" data-key="home"><i class="ic" data-ic="home" data-s="22"></i>Ana ekran</button>
+          <button class="keyt" data-key="voldown"><i class="ic" data-ic="minus" data-s="22"></i>Ses −</button>
+          <button class="keyt" data-key="volup"><i class="ic" data-ic="plus" data-s="22"></i>Ses +</button>
+        </div>
+        <div class="field pillf"><i class="ic" data-ic="keyboard" data-s="20"></i><input id="tvKbd" placeholder="TV’ye yaz (klavye)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="ibtn flat gold" id="tvKbdSend" aria-label="Gönder"><i class="ic" data-ic="send" data-s="20"></i></button></div>
+        <div class="row"><span class="grow ink2">Yazdıkça gönder</span><input type="checkbox" class="sw" id="tvKbdLive" aria-label="Yazdıkça gönder" checked></div>
+        <div class="grid3" style="grid-template-columns:repeat(3,1fr)"><button class="btn" data-key="enter">Enter</button><button class="btn" data-key="del">Sil ⌫</button><button class="btn" data-key="tab">Tab</button></div>
+        <p class="hint">Telefonun klavyesi ya da bilgisayar klavyesi çalışır: yazı alanına dokunup yazın; ok tuşları, Enter, Esc ve Backspace TV’ye gider. Türkçe harfler desteklenmez.</p>
+      </div>
+      <div class="card tvsrc">
+        <h2 class="sec-t" style="margin:0">Kaynak</h2>
+        <button class="psbtn" data-do="tv.input" data-body='{"input":"ps"}'><i class="ic" data-ic="gamepad" data-s="28"></i><span class="grow" style="text-align:left"><b style="display:block;font-weight:500">PlayStation 5</b><small style="font-size:12px">HDMI 3 · TV kaynağını değiştirir</small></span><i class="ic" data-ic="chevron-right" data-s="20"></i></button>
+        <div class="grid3"><button class="keyt" data-do="tv.input" data-body='{"input":"hdmi1"}'><i class="ic" data-ic="input" data-s="22"></i>HDMI 1</button><button class="keyt" data-do="tv.input" data-body='{"input":"hdmi2"}'><i class="ic" data-ic="input" data-s="22"></i>HDMI 2</button><button class="keyt" data-do="tv.input" data-body='{"input":"hdmi3"}'><i class="ic" data-ic="input" data-s="22"></i>HDMI 3</button></div>
+        <div class="grid2"><button class="btn" data-key="source"><i class="ic" data-ic="input" data-s="20"></i>Kaynak menüsü</button><button class="btn" data-key="live"><i class="ic" data-ic="tv" data-s="20"></i>Canlı TV</button></div>
+      </div>
+      <div class="remote">
+        <div class="rrow"><button class="key" data-key="mute" aria-label="Sessiz"><i class="ic" data-ic="volume-x" data-s="22"></i></button><span class="rlabel">TCL</span><button class="key pwr" data-key="power" aria-label="Güç"><i class="ic" data-ic="power" data-s="22"></i></button></div>
+        <div class="ring">
+          <button class="u" data-key="up" aria-label="Yukarı"><i class="ic" data-ic="chevron-up" data-s="26"></i></button>
+          <button class="l" data-key="left" aria-label="Sol"><i class="ic" data-ic="chevron-left" data-s="26"></i></button>
+          <button class="o" data-key="ok">OK</button>
+          <button class="rr" data-key="right" aria-label="Sağ"><i class="ic" data-ic="chevron-right" data-s="26"></i></button>
+          <button class="d" data-key="down" aria-label="Aşağı"><i class="ic" data-ic="chevron-down" data-s="26"></i></button>
+        </div>
+        <div class="rrow"><button class="key" data-key="back" aria-label="Geri"><i class="ic" data-ic="back" data-s="22"></i></button><button class="key ast" data-key="assist" aria-label="Asistan"><i class="ic" data-ic="mic" data-s="22"></i></button><button class="key" data-key="home" aria-label="Ana ekran"><i class="ic" data-ic="home" data-s="22"></i></button></div>
+        <div class="rrow"><button class="key" data-key="settings" aria-label="Ayarlar"><i class="ic" data-ic="sliders" data-s="22"></i></button><button class="key" data-key="source" aria-label="Kaynak"><i class="ic" data-ic="input" data-s="22"></i></button><button class="key" data-key="menu" aria-label="Menü"><i class="ic" data-ic="menu" data-s="22"></i></button><button class="key" data-key="live" aria-label="Canlı TV"><i class="ic" data-ic="tv" data-s="22"></i></button></div>
+        <div class="rrow">
+          <div class="vc"><button data-key="volup" aria-label="Ses +"><i class="ic" data-ic="plus" data-s="22"></i></button><small>SES</small><button data-key="voldown" aria-label="Ses −"><i class="ic" data-ic="minus" data-s="22"></i></button></div>
+          <div class="vmid"><button class="key" data-key="subtitle">123</button><button class="key" data-key="info" aria-label="Bilgi"><i class="ic" data-ic="info" data-s="22"></i></button></div>
+          <div class="vc"><button data-key="chup" aria-label="Kanal +"><i class="ic" data-ic="chevron-up" data-s="22"></i></button><small>KANAL</small><button data-key="chdown" aria-label="Kanal −"><i class="ic" data-ic="chevron-down" data-s="22"></i></button></div>
+        </div>
+        <div class="cbars"><button class="red" data-key="red" aria-label="Kırmızı"></button><button class="green" data-key="green" aria-label="Yeşil"></button><button class="yellow" data-key="yellow" aria-label="Sarı"></button><button class="blue" data-key="blue" aria-label="Mavi"></button></div>
+        <details class="nums"><summary>Rakam tuşları <i class="ic" data-ic="chevron-down" data-s="20"></i></summary>
+          <div class="keypad"><button class="key" data-key="n1">1</button><button class="key" data-key="n2">2</button><button class="key" data-key="n3">3</button><button class="key" data-key="n4">4</button><button class="key" data-key="n5">5</button><button class="key" data-key="n6">6</button><button class="key" data-key="n7">7</button><button class="key" data-key="n8">8</button><button class="key" data-key="n9">9</button><span></span><button class="key" data-key="n0">0</button><span></span></div>
+        </details>
+      </div>
+      <div class="col tvrest">
+        <div><h2 class="sec-t">Uygulamalar</h2>
+          <div class="apps">
+            <button class="app" data-pkg="com.netflix.ninja"><span class="bd" style="background:#E50914">N</span><span class="n">Netflix</span></button>
+            <button class="app" data-pkg="com.amazon.amazonvideo.livingroom"><span class="bd" style="background:#00A8E1">P</span><span class="n">Prime Video</span></button>
+            <button class="app" data-pkg="com.google.android.youtube.tv"><span class="bd" style="background:#FF0000">Y</span><span class="n">YouTube</span></button>
+            <button class="app" data-pkg="com.spotify.tv.android"><span class="bd" style="background:#1DB954">S</span><span class="n">Spotify</span></button>
+            <button class="app" data-pkg="com.phlox.tvwebbrowser"><span class="bd" style="background:#4B5563">B</span><span class="n">TV Bro</span></button>
+            <button class="app" data-pkg="com.android.tv.settings"><span class="bd" style="background:#6B7280">A</span><span class="n">Ayarlar</span></button>
+          </div>
+        </div>
+        <div><div class="row sb"><h2 class="sec-t" style="margin:0">TV’de kurulu uygulamalar</h2><button class="btn ghost" id="appsRefresh" style="min-height:44px;padding:0 8px">Yenile</button></div>
+          <div id="tvApps" class="apps" style="margin-top:10px"><span class="hint">yükleniyor…</span></div>
+        </div>
+        <div><h2 class="sec-t">TV ekranını yansıt</h2>
+          <div class="card">
+            <img id="tvShot" class="shot" alt="TV ekranı" hidden>
+            <div class="pv" id="tvPh"><i class="ic" data-ic="tv" data-s="32"></i><span>Canlı yansıtma kapalı</span></div>
+            <div class="row"><div class="grow"><b style="font-weight:500">Canlı yansıt</b><div class="hint">1,5 sn’de bir yenilenir · görüntüye dokunarak TV’de tıklayabilirsiniz · korumalı içerik (Netflix, Prime) siyah görünür</div></div><button class="ibtn" id="tvRefresh" aria-label="Yenile"><i class="ic" data-ic="refresh" data-s="20"></i></button><input type="checkbox" class="sw" id="tvLive" aria-label="Canlı yansıt"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CİHAZLAR · TABLET ===== -->
+  <section id="t-tab">
+    <div class="top"><h1>Cihazlar</h1><span class="chip" id="tabChip" hidden></span></div>
+    <div class="seg dev" style="margin-bottom:20px;max-width:420px"><button data-go="tv">TV</button><button class="on" data-go="tab">Tablet</button></div>
+    <div class="cols">
+      <div class="col">
+        <div class="card" style="padding:10px 16px"><div class="row"><span class="bub"><i class="ic" data-ic="tablet" data-s="20"></i></span><div class="grow"><b style="font-weight:500">Tablet</b><div class="hint" id="tabSub">ekran ve tuşlar</div></div><button class="ibtn" data-do="tablet.wake" aria-label="Uyandır"><i class="ic" data-ic="power" data-s="20"></i></button></div></div>
+        <div><h2 class="sec-t">Tablet ekranı</h2>
+          <div class="card">
+            <img id="tabShot" class="shot" alt="tablet ekranı" style="touch-action:none;user-select:none;-webkit-user-drag:none;min-height:120px">
+            <div class="row"><div class="grow"><b style="font-weight:500">Canlı yenile</b><div class="hint">Resme dokunun = tıklama · sürükleyin = kaydırma</div></div><button class="ibtn" id="tabRefresh" aria-label="Yenile"><i class="ic" data-ic="refresh" data-s="20"></i></button><input type="checkbox" class="sw" id="tabLive" checked aria-label="Canlı yenile"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div><h2 class="sec-t">Tuşlar</h2>
+          <div class="grid3">
+            <button class="keyt" data-tkey="back"><i class="ic" data-ic="back" data-s="22"></i>Geri</button>
+            <button class="keyt" data-tkey="home"><i class="ic" data-ic="home" data-s="22"></i>Ana ekran</button>
+            <button class="keyt" data-tkey="recents"><i class="ic" data-ic="apps" data-s="22"></i>Son uygulamalar</button>
+            <button class="keyt" data-tkey="voldown"><i class="ic" data-ic="minus" data-s="22"></i>Ses −</button>
+            <button class="keyt" data-tkey="mute"><i class="ic" data-ic="volume-x" data-s="22"></i>Sessiz</button>
+            <button class="keyt" data-tkey="volup"><i class="ic" data-ic="plus" data-s="22"></i>Ses +</button>
+          </div>
+          <div class="grid2" style="margin-top:8px"><button class="btn" data-do="tablet.wake"><i class="ic" data-ic="sun" data-s="20"></i>Uyandır</button><button class="btn bad" data-tkey="sleep"><i class="ic" data-ic="power" data-s="20"></i>Ekranı kapat</button></div>
+          <div class="card" style="padding:10px 16px;margin-top:8px"><div class="row"><i class="ic mute" data-ic="sun-dim" data-s="20"></i><input type="range" id="tabBright" min="10" max="255" value="120"><i class="ic mute" data-ic="sun" data-s="20"></i></div></div>
+        </div>
+        <div><h2 class="sec-t">Yazı gönder</h2>
+          <div class="field pillf"><i class="ic" data-ic="keyboard" data-s="20"></i><input id="tabText" placeholder="Seçili alana yazılacak metin" autocomplete="off"><button class="ibtn flat gold" id="tabSend" aria-label="Gönder"><i class="ic" data-ic="send" data-s="20"></i></button></div>
+          <div class="row sb" style="margin-top:6px"><p class="hint">Harf, rakam ve . , : / @ _ + = ? &amp; # % - desteklenir (Türkçe harfler yok).</p><button class="btn" data-tkey="enter" style="min-height:44px;padding:0 14px">Enter</button></div>
+        </div>
+        <div><h2 class="sec-t">Hızlı</h2>
+          <div class="grid2"><button class="btn" data-do="radio.tablet"><i class="ic" data-ic="radio" data-s="20"></i>Radyo · Tablet</button></div>
+          <button class="btn bad wide" data-do="radio.stop" data-body='{"device":"tablet"}' style="margin-top:8px"><i class="ic" data-ic="stop" data-s="20"></i>Radyoyu durdur</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== AĞ ===== -->
+  <section id="t-net">
+    <div class="top"><h1>Ağ</h1><button class="ibtn" id="netRefresh" aria-label="Yenile"><i class="ic" data-ic="refresh" data-s="20"></i></button></div>
+    <div class="cols">
+      <div class="col">
+        <div class="card sum" id="netSum" hidden></div>
+        <div><h2 class="sec-t">Evdeki cihazlar (modem)</h2>
+          <div id="netList"><div class="card"><div class="row"><span class="sk" style="width:40px;height:40px;border-radius:50%"></span><div class="grow"><div class="sk" style="width:140px;height:12px;margin-bottom:6px"></div><div class="sk" style="width:200px;height:10px"></div></div></div></div></div>
+          <div class="row" style="margin-top:12px;padding:0 4px"><span class="grow ink2">Çevrim dışıları da göster</span><input type="checkbox" class="sw" id="netOffline" aria-label="Çevrim dışıları göster"></div>
+          <p class="hint" style="margin-top:6px;padding:0 4px">Anahtar = internet açık / kesik · saat = zamanla</p>
+        </div>
+      </div>
+      <div class="col">
+        <div><h2 class="sec-t">Sunucu</h2>
+          <div class="card">
+            <div class="row"><span class="bub"><i class="ic" data-ic="server" data-s="20"></i></span><div class="grow"><b style="font-weight:500">x270 sunucu</b><div class="hint" id="srvLink">&nbsp;</div></div><span class="chip" id="srvChip" hidden></span></div>
+            <div id="srvStat" class="stats"><span class="hint">yükleniyor…</span></div>
+            <button class="btn wide" data-do="server.restart_service" data-body='{"name":"personal-home-assistant"}'><i class="ic" data-ic="refresh" data-s="20"></i>Personal Home Assistant’nı yeniden başlat</button>
+            <button class="btn wide" data-do="server.restart_service" data-body='{"name":"code-server"}'><i class="ic" data-ic="code" data-s="20"></i>VS Code’u yeniden başlat</button>
+            <button class="btn bad wide" id="srvReboot"><i class="ic" data-ic="power" data-s="20"></i>Sunucuyu yeniden başlat</button>
+            <p class="hint">Sunucuyu yeniden başlatmak onay ister; birkaç dakika uygulama kapalı kalır.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RUTİNLER ===== -->
+  <section id="t-sch">
+    <div class="top"><h1>Rutinler</h1><button class="ibtn acc" id="schAdd" aria-label="Rutin ekle"><i class="ic" data-ic="plus" data-s="22"></i></button></div>
+    <p class="ink2" style="margin-bottom:16px">Belirli saatte radyo veya internet kesme.</p>
+    <div id="schList" class="rules"></div>
+    <button class="btn wide" id="schAdd2" style="margin-top:16px"><i class="ic" data-ic="plus" data-s="20"></i>Rutin ekle</button>
+  </section>
+
+</main>
+<nav>
+  <button data-tab="home" class="on"><span class="p"><i class="ic" data-ic="home" data-s="22"></i></span>Ev</button>
+  <button data-tab="dev"><span class="p"><i class="ic" data-ic="devices" data-s="22"></i></span>Cihazlar</button>
+  <button data-tab="net"><span class="p"><i class="ic" data-ic="wifi" data-s="22"></i></span>Ağ</button>
+  <button data-tab="sch"><span class="p"><i class="ic" data-ic="clock" data-s="22"></i></span>Rutinler</button>
+</nav>
+
+<div id="scrim" class="scrim"></div>
+<!-- Rutin ekle / düzenle -->
+<div id="sheetRule" class="sheet" role="dialog" aria-modal="true" aria-label="Rutin">
+  <div class="grip"></div>
+  <div class="row sb"><h2 id="ruleTitle" style="font-size:20px;line-height:26px;font-weight:700">Yeni rutin</h2><button class="ibtn flat" data-close aria-label="Kapat"><i class="ic" data-ic="x" data-s="22"></i></button></div>
+  <div id="ruleBody" style="display:flex;flex-direction:column;gap:16px"></div>
+  <div class="grid2"><button class="btn" data-close>Vazgeç</button><button class="btn pri" id="ruleSave"><i class="ic" data-ic="check" data-s="20"></i>Kaydet</button></div>
+</div>
+<!-- Telefon → TV -->
+<div id="sheetMirror" class="sheet" role="dialog" aria-modal="true" aria-label="Yansıt">
+  <div class="grip"></div>
+  <div class="row sb"><h2 style="font-size:20px;line-height:26px;font-weight:700">Telefon → TV</h2><button class="ibtn flat" data-close aria-label="Kapat"><i class="ic" data-ic="x" data-s="22"></i></button></div>
+  <button class="btn pri wide" id="mirrorBtn"><i class="ic" data-ic="share" data-s="20"></i>Ekranımı TV’ye yansıt</button>
+  <button class="btn wide" id="dexBtn"><i class="ic" data-ic="monitor" data-s="20"></i>DeX’i TV’de aç</button>
+  <p class="hint">TV açılır ve Smart View gelir. Son adımda telefonda TV’yi (TCL) seçmeniz gerekir; Samsung bunu uygulamalara bırakmıyor. DeX’te telefon dokunmatik yüzey olur.</p>
+</div>
+<!-- Sunucu yeniden başlatma onayı -->
+<div id="sheetReboot" class="sheet" role="dialog" aria-modal="true" aria-label="Onay">
+  <div class="grip"></div>
+  <span class="bub lg bad"><i class="ic" data-ic="alert" data-s="26"></i></span>
+  <h2 style="font-size:20px;line-height:26px;font-weight:700">Sunucu yeniden başlatılsın mı?</h2>
+  <p class="ink2">Uygulama birkaç dakika kapalı kalır. Çalan radyo durur.</p>
+  <div class="grid2"><button class="btn" data-close>Vazgeç</button><button class="btn bad" id="rebootYes"><i class="ic" data-ic="power" data-s="20"></i>Yeniden başlat</button></div>
+</div>
+
+<!-- Cihaz adı -->
+<div id="sheetName" class="sheet" role="dialog" aria-modal="true" aria-label="Cihaz adı">
+  <div class="grip"></div>
+  <div class="row sb"><h2 style="font-size:20px;line-height:26px;font-weight:700">Cihaz adı</h2><button class="ibtn flat" data-close aria-label="Kapat"><i class="ic" data-ic="x" data-s="22"></i></button></div>
+  <div class="fgrp"><label class="lbl" for="renName">Yeni ad</label><div class="field"><input id="renName" maxlength="40" autocomplete="off" placeholder="Örn: Salon TV"></div><p class="hint" id="renHost" style="margin-top:6px"></p></div>
+  <p class="hint">Ad modemde (GL.iNet) saklanır; modemin kendi paneli ve bu uygulama aynı adı gösterir.</p>
+  <div class="grid2"><button class="btn" id="renReset">Varsayılana dön</button><button class="btn pri" id="renSave"><i class="ic" data-ic="check" data-s="20"></i>Kaydet</button></div>
+</div>
+<!-- APK indirme adresi (eski uygulama sürümleri için) -->
+<div id="sheetApk" class="sheet" role="dialog" aria-modal="true" aria-label="APK indir">
+  <div class="grip"></div>
+  <div class="row sb"><h2 style="font-size:20px;line-height:26px;font-weight:700">Uygulamayı indir</h2><button class="ibtn flat" data-close aria-label="Kapat"><i class="ic" data-ic="x" data-s="22"></i></button></div>
+  <p class="ink2">Bu uygulama sürümü indirmeyi kendisi açamıyor. Adresi telefonun tarayıcısına (Chrome) yapıştırın; indirilen dosyaya dokunup kurun.</p>
+  <div class="field"><input id="apkUrl" readonly></div>
+  <button class="btn pri wide" id="apkCopy"><i class="ic" data-ic="link" data-s="20"></i>Adresi kopyala</button>
+</div>
+<!-- Mini oynatıcı -->
+<div id="mini" class="mini" hidden><span class="bub sm"><i class="ic" data-ic="volume" data-s="18"></i></span><div class="grow"><b id="miniT"></b><small>Uygulamada çalıyor</small></div><button class="btn" id="miniStop"><i class="ic" data-ic="stop" data-s="20"></i>Durdur</button></div>
+<div id="toast" class="toast" role="status" aria-live="polite"><span class="ti"></span><span class="m"></span></div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

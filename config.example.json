@@ -1,0 +1,17 @@
+{
+  "port": 8765,
+  "tv": {
+    "ip": "192.168.1.20",
+    "adbPort": 5555
+  },
+  "tablet": {
+    "ip": "192.168.1.21",
+    "adbPort": 5555
+  },
+  "streamUrl": "https://example.com/stream.mp3",
+  "radioPage": "https://example.com/radio",
+  "tvBroPkg": "com.phlox.tvwebbrowser",
+  "browserPkgTablet": "acr.browser.lightning",
+  "vlcPkg": "org.videolan.vlc",
+  "tz": "UTC"
+}
